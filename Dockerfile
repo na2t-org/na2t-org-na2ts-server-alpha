@@ -2,11 +2,16 @@
 FROM node:16.10.0 as frontend-build
 #RUN npm install -g yarn
 WORKDIR /app
+
+# Installing deps before anything else, can cache this.
 COPY frontend/package.json frontend/yarn.lock ./
 RUN yarn install
+
 COPY frontend ./
-# Apply the build time hack.
-RUN mv svelte.config.js.prod svelte.config.js 
+# Apply the build time hacks (Yes we need to do this after adding all the file.).
+COPY docker/build.sh ./build.sh
+RUN chmod +x ./build.sh && ./build.sh
+
 RUN yarn build
 
 
@@ -21,6 +26,9 @@ RUN chmod +x ./start.sh
 
 COPY docker/prestart.sh ./prestart.sh
 RUN chmod +x ./prestart.sh
+
+COPY docker/prod.sh ./prod.sh
+RUN chmod +x ./prod.sh && ./prod.sh
 
 COPY --from=frontend-build /app/build ./frontend/
 COPY backend ./
