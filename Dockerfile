@@ -15,6 +15,14 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim-2021-10-02
 WORKDIR /app
 COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+COPY docker/start.sh ./start.sh
+RUN chmod +x ./start.sh
+
+COPY docker/prestart.sh ./prestart.sh
+RUN chmod +x ./prestart.sh
+
 COPY --from=frontend-build /app/build ./frontend/
 COPY backend ./
+
 CMD ["./start.sh"]
